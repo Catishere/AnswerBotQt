@@ -9,6 +9,7 @@
 #include <dinput.h>
 
 #include <QDebug>
+#include <QTimer>
 #include <QSettings>
 #include <QMap>
 #include <QList>
@@ -23,13 +24,15 @@
 #define SAMPLE_RATE 10
 #define NICK "Cat"
 
-class Reader
+class Reader : public QObject
 {
+    Q_OBJECT
     Answerer answerer;
     QList<QByteArray> prevLines;
     QMap<const QByteArray, int> comboMap;
     QSettings settings;
     QString nickname;
+    QTimer *timer;
 
     HMODULE clientDll;
     HMODULE hwDll;
@@ -41,19 +44,26 @@ class Reader
     UINT_PTR prisonersAddress;
     UINT_PTR hudAddress;
 
+    TCHAR chat_buffer[sizeof(chat_struct)];
+    TCHAR hud_buffer[sizeof(hud_struct)];
+    char lastHud[HUD_SECTOR_LEN];
+
+    QByteArray Utf8Encode(const wchar_t * wstr) const;
     int GetHLProcessID();
     int GetDlls();
-    QByteArray Utf8Encode(const wchar_t * wstr) const;
-    int handleCombo(char * combo_cstr);
-    int handleComboInstruction(QByteArray &instruction);
     int OpenP();
     int CloseP();
     void SendKey(const int key);
-    int Read();
+    void read();
     bool isGameFocused() const;
+    int handleCombo(char * combo_cstr);
+    int handleComboInstruction(QByteArray &instruction);
     int updatePrisoners();
+public slots:
+    void processGameMemory();
 public:
-    Reader();
+    explicit Reader(QObject *parent = nullptr);
+    ~Reader();
 };
 
 #endif // READER_H

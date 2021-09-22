@@ -15,10 +15,8 @@ private:
 public:
     explicit NetworkManager(IAnswerer * answerer);
     ~NetworkManager();
-    int fromGoogle(QByteArray question);
+    void fromGoogle(QByteArray question);
 public slots:
-    void error(QNetworkReply::NetworkError);
-    void sslErrors(const QList<QSslError> &errors);
     void finished(QNetworkReply *reply);
 signals:
     void parsed(QByteArray answer);

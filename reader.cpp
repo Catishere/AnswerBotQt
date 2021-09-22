@@ -118,8 +118,9 @@ int Reader::GetDlls()
     return 0;
 }
 
-Reader::Reader()
-    : answerer(settings),
+Reader::Reader(QObject *parent)
+    : QObject(parent),
+      answerer(settings),
       settings(QSettings::IniFormat, QSettings::UserScope,
                            "CatCompany", "CSChatQt")
 {
@@ -148,8 +149,13 @@ Reader::Reader()
     GetHLProcessID();
     GetDlls();
     OpenP();
-    Read();
+    read();
     CloseP();
+}
+
+Reader::~Reader()
+{
+    delete timer;
 }
 
 int Reader::OpenP()
@@ -166,92 +172,99 @@ int Reader::CloseP()
     return 0;
 }
 
-int Reader::Read()
+void Reader::read()
 {
-    TCHAR chat_buffer[sizeof(chat_struct)];
-    TCHAR hud_buffer[sizeof(hud_struct)];
-    char lastHud[HUD_SECTOR_LEN];
+    updatePrisoners();
+    timer = new QTimer(this);
+    connect(timer, &QTimer::timeout,
+            this, &Reader::processGameMemory);
+    timer->start(SAMPLE_RATE);
+//    while (true) {
+//        Sleep(SAMPLE_RATE);
+//        processGameMemory();
+//    }
+}
+
+void Reader::processGameMemory()
+{
     bool isCombo = false;
     size_t bytesRead;
 
-    updatePrisoners();
+    if (ReadProcessMemory(processHandle,
+                          (void *)(chatAddress),
+                          chat_buffer,
+                          sizeof(chat_buffer),
+                          &bytesRead))
+    {
+        chat_struct * chat = (chat_struct *)chat_buffer;
 
-    while (true) {
-        Sleep(SAMPLE_RATE);
-        if (ReadProcessMemory(processHandle,
-                              (void *)(chatAddress),
-                              chat_buffer,
-                              sizeof(chat_buffer),
-                              &bytesRead))
-        {
-            chat_struct * chat = (chat_struct *)chat_buffer;
+        for (auto &line : chat->lines) {
+            auto qbaLine = Utf8Encode(line);
+            if (prevLines.contains(qbaLine))
+                continue;
 
-            for (auto &line : chat->lines) {
-                auto qbaLine = Utf8Encode(line);
-                if (prevLines.contains(qbaLine))
-                    continue;
+            bool any = true;
 
-                bool any = true;
+            if (qbaLine.indexOf(NICK": !m ") >= 0) {
+                auto qi = qbaLine.lastIndexOf("!m");
+                if (qi < 0) continue;
+                auto index = qbaLine.size() - qi - 3;
+                qDebug() << "> " << answerer.answer(qbaLine.right(index));
+                SendKey(DIK_NUMPAD4);
+            } else if (qbaLine.indexOf(NICK": clr") >= 0) {
+                prevLines.clear();
+                qDebug() << "Reset list";
+            } else if (qbaLine.indexOf(NICK": ok") >= 0) {
+                isCombo = false;
+                qDebug() << "Reset combo";
+            } else if (qbaLine.indexOf(NICK": ") >= 0) {
+                auto index = qbaLine.size() - qbaLine.lastIndexOf(": ")-3;
+                QByteArray ins = qbaLine.right(index);
+                handleComboInstruction(ins);
+            } else if (qbaLine.indexOf(NICK" to SPECTATOR") >= 0) {
+                QByteArray ba("ne sum afk we");
+                answerer.makeWrite(ba);
+                SendKey(DIK_NUMPAD4);
+                SendKey(DIK_NUMPAD5);
+                qDebug() << "Cried spectator";
+            } else if (qbaLine.indexOf("[Quest]\x03") >= 0) {
+                auto qi = qbaLine.lastIndexOf("\x04");
+                if (qi < 0) continue;
+                auto index = qbaLine.size() - qi - 2;
+                updatePrisoners();
+                qDebug() << "Quest Answer: "
+                         << answerer.answer(qbaLine.right(index));
+                SendKey(DIK_NUMPAD4);
+            } else {
+                any = false;
+            }
 
-                if (qbaLine.indexOf(NICK": !m ") >= 0) {
-                    auto qi = qbaLine.lastIndexOf("!m");
-                    if (qi < 0) continue;
-                    auto index = qbaLine.size() - qi - 3;
-                    qDebug() << "> " << answerer.answer(qbaLine.right(index));
-                    SendKey(DIK_NUMPAD4);
-                } else if (qbaLine.indexOf(NICK": clr") >= 0) {
-                    prevLines.clear();
-                    qDebug() << "Reset list";
-                } else if (qbaLine.indexOf(NICK": ok") >= 0) {
-                    isCombo = false;
-                    qDebug() << "Reset combo";
-                } else if (qbaLine.indexOf(NICK": ") >= 0) {
-                    auto index = qbaLine.size() - qbaLine.lastIndexOf(": ")-3;
-                    QByteArray ins = qbaLine.right(index);
-                    handleComboInstruction(ins);
-                } else if (qbaLine.indexOf(NICK" to SPECTATOR") >= 0) {
-                    QByteArray ba("ne sum afk we");
-                    answerer.makeWrite(ba);
-                    SendKey(DIK_NUMPAD4);
-                    SendKey(DIK_NUMPAD5);
-                    qDebug() << "Cried spectator";
-                } else if (qbaLine.indexOf("[Quest]\x03") >= 0) {
-                    auto qi = qbaLine.lastIndexOf("\x04");
-                    if (qi < 0) continue;
-                    auto index = qbaLine.size() - qi - 2;
-                    updatePrisoners();
-                    qDebug() << "Quest Answer: "
-                             << answerer.answer(qbaLine.right(index));
-                    SendKey(DIK_NUMPAD4);
-                } else {
-                    any = false;
-                }
-
-                if (any) {
-                    prevLines.append(qbaLine);
-                    if (prevLines.size() >= 5)
-                        prevLines.removeFirst();
-                }
+            if (any) {
+                prevLines.append(qbaLine);
+                if (prevLines.size() >= 5)
+                    prevLines.removeFirst();
             }
         }
+    } else {
+        qDebug() << GetLastError();
+    }
 
-        if (ReadProcessMemory(processHandle,
-                              (void *)(hudAddress),
-                              hud_buffer,
-                              sizeof(hud_buffer),
-                              &bytesRead))
-        {
-            hud_struct * hud = (hud_struct *)hud_buffer;
-            for (auto &sector : hud->sectors) {
-                if (!strcmp(lastHud, sector))
-                    continue;
-                QString qSector(sector);
-                if (!isCombo && qSector.count('\n') > 5) {
-                    isCombo = true;
-                    handleCombo(sector);
-                } else if (qSector.startsWith("JailBreak - Day ")) {
-                    answerer.setJbDay(QString(qSector.right(2).trimmed()));
-                }
+    if (ReadProcessMemory(processHandle,
+                          (void *)(hudAddress),
+                          hud_buffer,
+                          sizeof(hud_buffer),
+                          &bytesRead))
+    {
+        hud_struct * hud = (hud_struct *)hud_buffer;
+        for (auto &sector : hud->sectors) {
+            if (!strcmp(lastHud, sector))
+                continue;
+            QString qSector(sector);
+            if (!isCombo && qSector.count('\n') > 5) {
+                isCombo = true;
+                handleCombo(sector);
+            } else if (qSector.startsWith("JailBreak - Day ")) {
+                answerer.setJbDay(QString(qSector.right(2).trimmed()));
             }
         }
     }
