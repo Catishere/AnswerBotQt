@@ -44,10 +44,6 @@ class Reader : public QObject
     UINT_PTR prisonersAddress;
     UINT_PTR hudAddress;
 
-    TCHAR chat_buffer[sizeof(chat_struct)];
-    TCHAR hud_buffer[sizeof(hud_struct)];
-    char lastHud[HUD_SECTOR_LEN];
-
     QByteArray Utf8Encode(const wchar_t * wstr) const;
     int GetHLProcessID();
     int GetDlls();

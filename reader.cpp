@@ -187,18 +187,19 @@ void Reader::read()
 
 void Reader::processGameMemory()
 {
+    chat_struct chat;
+    hud_struct hud;
+    char lastHud[HUD_SECTOR_LEN];
     bool isCombo = false;
     size_t bytesRead;
 
     if (ReadProcessMemory(processHandle,
                           (void *)(chatAddress),
-                          chat_buffer,
-                          sizeof(chat_buffer),
+                          (TCHAR *)&chat,
+                          sizeof(chat_struct),
                           &bytesRead))
     {
-        chat_struct * chat = (chat_struct *)chat_buffer;
-
-        for (auto &line : chat->lines) {
+        for (auto &line : chat.lines) {
             auto qbaLine = Utf8Encode(line);
             if (prevLines.contains(qbaLine))
                 continue;
@@ -251,12 +252,11 @@ void Reader::processGameMemory()
 
     if (ReadProcessMemory(processHandle,
                           (void *)(hudAddress),
-                          hud_buffer,
-                          sizeof(hud_buffer),
+                          (TCHAR *)&hud,
+                          sizeof(hud_struct),
                           &bytesRead))
     {
-        hud_struct * hud = (hud_struct *)hud_buffer;
-        for (auto &sector : hud->sectors) {
+        for (auto &sector : hud.sectors) {
             if (!strcmp(lastHud, sector))
                 continue;
             QString qSector(sector);
