@@ -11,7 +11,7 @@ QByteArray Answerer::answer(QByteArray q)
             .remove(re3)
             .toUtf8();
 
-    QByteArray answer("Error");
+    QByteArray answer("Not found, trying google");
     int error;
     double res = te_interp(ql.constData(), &error);
 
@@ -19,11 +19,13 @@ QByteArray Answerer::answer(QByteArray q)
         answer = QByteArray::number(res, 'f', 2);
         if (answer.endsWith(".00"))
             answer.chop(3);
+        makeWrite(answer);
     } else if (ql.indexOf("stolica") >= 0) {
         answer = answerCapitals(ql);
+        makeWrite(answer);
+    } else {
+        netManager.fromGoogle(q.toPercentEncoding());
     }
-
-    makeWrite(answer);
 
     return answer;
 }
@@ -51,11 +53,17 @@ QByteArray Answerer::answerCapitals(QByteArray &question) const
 
     auto m_country = re_country.match(question);
     if (m_country.hasMatch()) {
-        return capitals.find(m_country.captured(1).toUtf8()).value();
+        auto hit = capitals.find(m_country.captured(1).toUtf8());
+        if (hit != capitals.end())
+            return hit.value();
     }
     auto m_capital = re_capital.match(question);
-    if (m_capital.hasMatch())
-        return countries.find(m_capital.captured(2).toUtf8()).value();
+    if (m_capital.hasMatch()) {
+        auto hit = countries.find(m_capital.captured(2).toUtf8());
+        if (hit != countries.end())
+            return hit.value();
+    }
+
     return QByteArray("Error");
 }
 
@@ -64,10 +72,11 @@ QByteArray Answerer::makeConfig(QByteArray &answer) const
     return QByteArray("alias quest \"say " + answer + "; alias quest\"");
 }
 
-Answerer::Answerer(QSettings &_settings)
-    : settings(_settings), netManager(this)
+Answerer::Answerer(QSettings &_settings, QObject *parent)
+    : QObject(parent), settings(_settings), netManager(this)
 {
-    netManager.fromGoogle(QByteArray("https://jsonplaceholder.typicode.com/todos/1"));
+    connect(&netManager, &NetworkManager::parsed,
+            this, &Answerer::networkAnswer);
     capitals =
     {
         {"abu dabi", "obedineni arabski emirstva"},
@@ -103,7 +112,7 @@ Answerer::Answerer(QSettings &_settings)
         {"bisau", "gvineq-bisau"},
         {"blumfontein", "republika iujna afrika"},
         {"bogota", "kolumbiq"},
-        {"brazavil", "republika kongo"},
+        {"brazavil", "kongo"},
         {"bratislava", "slovakiq"},
         {"brijtaun", "barbados"},
         {"briuksel", "belgiq"},
@@ -165,6 +174,7 @@ Answerer::Answerer(QSettings &_settings)
         {"lobamba", "esvatini"},
         {"lome", "togo"},
         {"london", "velikobritaniq"},
+        {"london", "angliq"},
         {"luanda", "angola"},
         {"lusaka", "zambiq"},
         {"liublqna", "sloveniq"},
@@ -229,6 +239,7 @@ Answerer::Answerer(QSettings &_settings)
         {"san hose", "kosta rika"},
         {"san huan", "puerto riko"},
         {"sana", "yemen"},
+        {"edinburg", "shotlandiq"},
         {"santo domingo", "dominikanska republika"},
         {"santqgo de chile", "chili"},
         {"sao tome", "sao tome i prinsipi"},
@@ -296,5 +307,8 @@ void Answerer::setJbDay(const QString &newJbDay)
 
 void Answerer::networkAnswer(QByteArray answer)
 {
-    qDebug() << "parsed: " << answer;
+    qDebug() << "> " << answer;
+    if (answer != "Google miss")
+        makeWrite(answer);
+    emit interruptLoop();
 }

@@ -120,7 +120,7 @@ int Reader::GetDlls()
 
 Reader::Reader(QObject *parent)
     : QObject(parent),
-      answerer(settings),
+      answerer(settings, this),
       settings(QSettings::IniFormat, QSettings::UserScope,
                            "CatCompany", "CSChatQt")
 {
@@ -150,6 +150,7 @@ Reader::Reader(QObject *parent)
     GetDlls();
     OpenP();
     read();
+    eventLoop();
     CloseP();
 }
 
@@ -175,14 +176,26 @@ int Reader::CloseP()
 void Reader::read()
 {
     updatePrisoners();
+
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout,
             this, &Reader::processGameMemory);
     timer->start(SAMPLE_RATE);
-//    while (true) {
-//        Sleep(SAMPLE_RATE);
-//        processGameMemory();
-//    }
+}
+
+void Reader::eventLoop()
+{
+    QEventLoop loop;
+    QTimer timer;
+    connect(&answerer, &Answerer::interruptLoop, &loop, &QEventLoop::quit);
+    connect(&answerer, &Answerer::interruptLoop,
+            this, &Reader::reloadButton);
+    connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    while (true) {
+        timer.setSingleShot(true);
+        timer.start(INT32_MAX);
+        loop.exec();
+    }
 }
 
 void Reader::processGameMemory()
@@ -190,7 +203,8 @@ void Reader::processGameMemory()
     chat_struct chat;
     hud_struct hud;
     char lastHud[HUD_SECTOR_LEN];
-    bool isCombo = false;
+    bool isCry = false;
+    bool isCombo = true;
     size_t bytesRead;
 
     if (ReadProcessMemory(processHandle,
@@ -206,28 +220,35 @@ void Reader::processGameMemory()
 
             bool any = true;
 
-            if (qbaLine.indexOf(NICK": !m ") >= 0) {
+            if (qbaLine.indexOf(NICK ": !m ") >= 0) {
                 auto qi = qbaLine.lastIndexOf("!m");
                 if (qi < 0) continue;
                 auto index = qbaLine.size() - qi - 3;
-                qDebug() << "> " << answerer.answer(qbaLine.right(index));
-                SendKey(DIK_NUMPAD4);
-            } else if (qbaLine.indexOf(NICK": clr") >= 0) {
+                QByteArray ans = answerer.answer(qbaLine.right(index));
+                qDebug() << "> " << ans;
+                if (!ans.startsWith("Not found"))
+                    SendKey(DIK_NUMPAD4);
+            } else if (qbaLine.indexOf(NICK ": clr") >= 0) {
+                isCry = false;
                 prevLines.clear();
                 qDebug() << "Reset list";
-            } else if (qbaLine.indexOf(NICK": ok") >= 0) {
+            } else if (qbaLine.indexOf(NICK ": ok") >= 0) {
                 isCombo = false;
                 qDebug() << "Reset combo";
-            } else if (qbaLine.indexOf(NICK": ") >= 0) {
+            } else if (qbaLine.indexOf(NICK ": ko") >= 0) {
+                isCombo = true;
+                qDebug() << "Stop combo";
+            } else if (qbaLine.indexOf(NICK ": ") >= 0) {
                 auto index = qbaLine.size() - qbaLine.lastIndexOf(": ")-3;
                 QByteArray ins = qbaLine.right(index);
                 handleComboInstruction(ins);
-            } else if (qbaLine.indexOf(NICK" to SPECTATOR") >= 0) {
+            } else if (!isCry && qbaLine.indexOf(NICK " to SPECTATOR") >= 0) {
                 QByteArray ba("ne sum afk we");
                 answerer.makeWrite(ba);
                 SendKey(DIK_NUMPAD4);
                 SendKey(DIK_NUMPAD5);
                 qDebug() << "Cried spectator";
+                isCry = true;
             } else if (qbaLine.indexOf("[Quest]\x03") >= 0) {
                 auto qi = qbaLine.lastIndexOf("\x04");
                 if (qi < 0) continue;
@@ -236,18 +257,19 @@ void Reader::processGameMemory()
                 qDebug() << "Quest Answer: "
                          << answerer.answer(qbaLine.right(index));
                 SendKey(DIK_NUMPAD4);
+            } else if (qbaLine.indexOf(" " NICK) >= 0
+                       || qbaLine.indexOf(" " NICK_LOWER) >= 0) {
+                qDebug() << qbaLine;
             } else {
                 any = false;
             }
 
             if (any) {
                 prevLines.append(qbaLine);
-                if (prevLines.size() >= 5)
+                if (prevLines.size() > 5)
                     prevLines.removeFirst();
             }
         }
-    } else {
-        qDebug() << GetLastError();
     }
 
     if (ReadProcessMemory(processHandle,
@@ -268,6 +290,12 @@ void Reader::processGameMemory()
             }
         }
     }
+}
+
+void Reader::reloadButton()
+{
+    qDebug() << "reloaded";
+    SendKey(DIK_NUMPAD4);
 }
 
 bool Reader::isGameFocused() const

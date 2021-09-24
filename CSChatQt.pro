@@ -1,5 +1,5 @@
 QT -= gui
-QT += network
+QT += network concurrent
 
 CONFIG += c++11 console
 CONFIG -= app_bundle
@@ -29,7 +29,6 @@ SOURCES += \
 
 HEADERS += \
     answerer.h \
-    ianswerer.h \
     networkmanager.h \
     reader.h \
     structs.h \

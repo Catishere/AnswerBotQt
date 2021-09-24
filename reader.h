@@ -23,6 +23,7 @@
 #define KEYHOLD_DURATION 20
 #define SAMPLE_RATE 10
 #define NICK "Cat"
+#define NICK_LOWER "cat"
 
 class Reader : public QObject
 {
@@ -51,12 +52,14 @@ class Reader : public QObject
     int CloseP();
     void SendKey(const int key);
     void read();
+    void eventLoop();
     bool isGameFocused() const;
     int handleCombo(char * combo_cstr);
     int handleComboInstruction(QByteArray &instruction);
     int updatePrisoners();
 public slots:
     void processGameMemory();
+    void reloadButton();
 public:
     explicit Reader(QObject *parent = nullptr);
     ~Reader();

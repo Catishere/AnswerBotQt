@@ -1,6 +1,7 @@
 #ifndef ANSWERER_H
 #define ANSWERER_H
 
+#include <QObject>
 #include <QtNetwork>
 #include <QByteArray>
 #include <QSettings>
@@ -10,10 +11,10 @@
 
 #include "networkmanager.h"
 #include "tinyexpr.h"
-#include "ianswerer.h"
 
-class Answerer : IAnswerer
+class Answerer : public QObject
 {
+    Q_OBJECT
     QMap<QByteArray, QByteArray> countries;
     QMap<QByteArray, QByteArray> capitals;
     QSettings & settings;
@@ -24,7 +25,7 @@ class Answerer : IAnswerer
     QByteArray answerCapitals(QByteArray &question) const;
     QByteArray makeConfig(QByteArray &answer) const;
 public:
-    Answerer(QSettings &settings);
+    explicit Answerer(QSettings &settings, QObject *parent = nullptr);
     QByteArray answer(QByteArray q);
     int writeConfig(QByteArray cfg);
     int makeWrite(QByteArray& expr);
@@ -34,6 +35,10 @@ public:
     void setJbDay(const QString &newJbDay);
 public slots:
     void networkAnswer(QByteArray answer);
+
+signals:
+    void interruptLoop();
+
 };
 
 #endif // ANSWERER_H
