@@ -24,7 +24,7 @@ QByteArray Answerer::answer(QByteArray q)
         answer = answerCapitals(ql);
         makeWrite(answer);
     } else {
-        netManager.fromGoogle(q.toPercentEncoding());
+        netManager.fromGoogleTranslated(q.toPercentEncoding());
     }
 
     return answer;
@@ -77,6 +77,7 @@ Answerer::Answerer(QSettings &_settings, QObject *parent)
 {
     connect(&netManager, &NetworkManager::parsed,
             this, &Answerer::networkAnswer);
+
     capitals =
     {
         {"abu dabi", "obedineni arabski emirstva"},

@@ -2,26 +2,45 @@
 
 NetworkManager::NetworkManager(QObject *parent) : QObject(parent)
 {
-    manager = new QNetworkAccessManager();
-    connect(manager, &QNetworkAccessManager::finished,
-            this, &NetworkManager::finished);
+    searchManager = new QNetworkAccessManager();
+    transManager = new QNetworkAccessManager();
+    connect(searchManager, &QNetworkAccessManager::finished,
+            this, &NetworkManager::finishedGoogle);
+    connect(transManager, &QNetworkAccessManager::finished,
+            this, &NetworkManager::finishedTranslate);
 }
 
 NetworkManager::~NetworkManager()
 {
-    delete manager;
+    delete searchManager;
+    delete transManager;
 }
 
 void NetworkManager::fromGoogle(QByteArray question)
 {
     QNetworkRequest req(QUrl("https://www.google.com/search?q=" + question));
-    //QNetworkRequest translate(QUrl(TRANSLATE_URL));
     req.setHeader(QNetworkRequest::UserAgentHeader, USER_AGENT);
     req.setRawHeader("Cookie", "CONSENT=YES+cb.20210919-19-p0.en+FX+947");
-    manager->get(req);
+    searchManager->get(req);
 }
 
-void NetworkManager::finished(QNetworkReply *reply)
+void NetworkManager::fromGoogleTranslated(QByteArray question)
+{
+    QNetworkRequest req(QUrl(TRANSLATE_URL + question));
+    req.setHeader(QNetworkRequest::UserAgentHeader, USER_AGENT);
+    req.setRawHeader("Cookie", "CONSENT=YES+cb.20210919-19-p0.en+FX+947");
+    transManager->get(req);
+}
+
+void NetworkManager::finishedTranslate(QNetworkReply *reply)
+{
+    QJsonDocument json = QJsonDocument::fromJson(reply->readAll());
+    QString s = json.array().at(0).toArray().at(0).toArray().at(0).toString();
+    qDebug() << "> Translate: " << s;
+    fromGoogle(s.toUtf8().toPercentEncoding());
+}
+
+void NetworkManager::finishedGoogle(QNetworkReply *reply)
 {
     QByteArray ba = reply->readAll();
     QFile file("text.html");

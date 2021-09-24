@@ -294,7 +294,6 @@ void Reader::processGameMemory()
 
 void Reader::reloadButton()
 {
-    qDebug() << "reloaded";
     SendKey(DIK_NUMPAD4);
 }
 

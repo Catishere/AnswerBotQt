@@ -6,8 +6,7 @@
 #include <QNetworkAccessManager>
 #include <QtConcurrent>
 #include <QNetworkReply>
-#include <QNetworkCookie>
-#include <QNetworkCookieJar>
+#include <QJsonDocument>
 
 #define TRANSLATE_URL "https://translate.google.bg/translate_a/single?"     \
             "client=gtx&sl=bg&tl=en&hl=en&dt=qca&dt=t&q="
@@ -19,15 +18,18 @@ class NetworkManager : public QObject
 {
     Q_OBJECT
 private:
-    QNetworkAccessManager *manager;
+    QNetworkAccessManager *searchManager;
+    QNetworkAccessManager *transManager;
     QByteArray find(QByteArray &ba, const char * start,
                     int offset, const char * end, bool isClean = true);
 public:
     explicit NetworkManager(QObject *parent = nullptr);
     ~NetworkManager();
     void fromGoogle(QByteArray question);
+    void fromGoogleTranslated(QByteArray question);
 public slots:
-    void finished(QNetworkReply *reply);
+    void finishedGoogle(QNetworkReply *reply);
+    void finishedTranslate(QNetworkReply *reply);
 signals:
     void parsed(QByteArray answer);
 };
