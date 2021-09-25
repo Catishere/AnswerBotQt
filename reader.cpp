@@ -284,6 +284,7 @@ void Reader::processGameMemory()
             QString qSector(sector);
             if (!isCombo && qSector.count('\n') > 5) {
                 isCombo = true;
+                qDebug() << "Executing Combo";
                 handleCombo(sector);
             } else if (qSector.startsWith("JailBreak - Day ")) {
                 answerer.setJbDay(QString(qSector.right(2).trimmed()));

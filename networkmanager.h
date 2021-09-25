@@ -20,8 +20,7 @@ class NetworkManager : public QObject
 private:
     QNetworkAccessManager *searchManager;
     QNetworkAccessManager *transManager;
-    QByteArray find(QByteArray &ba, const char * start,
-                    int offset, const char * end, bool isClean = true);
+    QByteArray find(QByteArray &ba, const QByteArrayView &selector);
 public:
     explicit NetworkManager(QObject *parent = nullptr);
     ~NetworkManager();
