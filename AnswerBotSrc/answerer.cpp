@@ -4,16 +4,18 @@ QByteArray Answerer::answer(QByteArray q)
 {
     QRegularExpression re("((den|day) (v|w) )?(jb|jailbreak)( den| day)?");
     QRegularExpression re2("(jivi|jiwi) (teroristi|t)");
-    QRegularExpression re3(" *\\?");
+    QRegularExpression re3("[ ]*\\?");
+    QRegularExpression re4("(kolko|e|sa|ima|ostanali|=| do |do)");
     QByteArray ql = QString(q.toLower())
             .replace(re, jbDay.toUtf8())
             .replace(re2, alivePrisoners.toUtf8())
             .remove(re3)
             .toUtf8();
+    QByteArray qlmath = QString(ql).remove(re4).toUtf8();
 
     QByteArray answer("Not found, trying google");
     int error;
-    double res = te_interp(ql.constData(), &error);
+    double res = te_interp(qlmath.constData(), &error);
 
     if (!error) {
         answer = QByteArray::number(res, 'f', 2);

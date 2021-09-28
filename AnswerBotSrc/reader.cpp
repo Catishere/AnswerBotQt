@@ -122,7 +122,7 @@ Reader::Reader(QObject *parent)
     : QObject(parent),
       answerer(settings, this),
       settings(QSettings::IniFormat, QSettings::UserScope,
-                           "CatCompany", "CSChatQt")
+                           "CatCompany", "AnswerBot")
 {
     if (!settings.contains("path"))
         settings.setValue("path", "YOUR_CSTRIKE_PATH");
