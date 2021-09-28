@@ -12,7 +12,9 @@ public:
     ~AnswerBot();
 
 private slots:
-    void test_case1();
+    void level1Tests();
+    void level2Tests();
+    void level3Tests();
 
 };
 
@@ -29,7 +31,18 @@ AnswerBot::~AnswerBot()
 
 }
 
-void AnswerBot::test_case1()
+void AnswerBot::level1Tests()
+{
+    QVERIFY(answerer.answer("123*123") == "15129");
+    QVERIFY(answerer.answer("Stolicata na Niderlandiq") == "amsterdam");
+}
+
+void AnswerBot::level2Tests()
+{
+
+}
+
+void AnswerBot::level3Tests()
 {
 
 }

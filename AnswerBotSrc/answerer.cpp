@@ -90,6 +90,7 @@ Answerer::Answerer(QSettings &_settings, QObject *parent)
         {"alofi", "niue"},
         {"aman", "yordaniq"},
         {"amsterdam", "niderlandiq"},
+        {"amsterdam", "holandiq"},
         {"andora la vela", "andora"},
         {"ankara", "turciq"},
         {"antananarivo", "madagaskar"},
