@@ -34,7 +34,7 @@ AnswerBot::~AnswerBot()
 void AnswerBot::level1Tests()
 {
     QVERIFY(answerer.answer("123*123") == "15129");
-    QVERIFY(answerer.answer("Stolicata na Niderlandiq") == "amsterdam");
+    QVERIFY(answerer.answer("Stolicata na Holandiq") == "amsterdam");
 }
 
 void AnswerBot::level2Tests()
