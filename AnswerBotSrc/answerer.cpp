@@ -2,6 +2,8 @@
 
 QByteArray Answerer::answer(QByteArray q)
 {
+    QByteArray clear;
+    makeWrite(clear);
     QRegularExpression re("((den|day) (v|w) )?(jb|jailbreak)( den| day)?");
     QRegularExpression re2("(jivi|jiwi) (teroristi|t)");
     QRegularExpression re3("[ ]*\\?");
@@ -89,8 +91,8 @@ Answerer::Answerer(QSettings &_settings, QObject *parent)
         {"aljir", "aljir"},
         {"alofi", "niue"},
         {"aman", "yordaniq"},
-        {"amsterdam", "niderlandiq"},
         {"amsterdam", "holandiq"},
+        {"amsterdam ", "niderlandiq"},
         {"andora la vela", "andora"},
         {"ankara", "turciq"},
         {"antananarivo", "madagaskar"},
@@ -178,7 +180,7 @@ Answerer::Answerer(QSettings &_settings, QObject *parent)
         {"lobamba", "esvatini"},
         {"lome", "togo"},
         {"london", "velikobritaniq"},
-        {"london", "angliq"},
+        {"london ", "angliq"},
         {"luanda", "angola"},
         {"lusaka", "zambiq"},
         {"liublqna", "sloveniq"},
