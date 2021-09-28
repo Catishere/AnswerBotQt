@@ -43,6 +43,9 @@ void NetworkManager::finishedTranslate(QNetworkReply *reply)
 void NetworkManager::finishedGoogle(QNetworkReply *reply)
 {
     QByteArray ba = reply->readAll();
+    QFile file("text.html");
+    file.open(QIODevice::WriteOnly);
+    file.write(ba);
 
     QList<QByteArrayView> selectors = {
         "<div class=\"Z0LcW XcVN5d",
@@ -50,7 +53,9 @@ void NetworkManager::finishedGoogle(QNetworkReply *reply)
         "<div jsname=\"T3JDGc\" class=\"FozYP",
         "<div class=\"uoFCfc",
         "<div class=\"ayqGOc",
-        "<div class=\"dDoNo"
+        "<div class=\"dDoNo",
+        "<pre class=\"tw-data-text tw-text-large XcVN5d tw-ta\" data-placeholder=\"Translation\" id=\"tw-target-text", // translate
+        "<div class=\"lr-fy-ev lr-fy-ov lr-fy-eq-elem", // math
     };
 
     for (auto &selector : selectors) {
