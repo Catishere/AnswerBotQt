@@ -221,6 +221,7 @@ void Reader::processGameMemory()
             bool any = true;
 
             if (qbaLine.indexOf(NICK ": !m ") >= 0) {
+                SendKey(DIK_NUMPAD6);
                 auto qi = qbaLine.lastIndexOf("!m");
                 if (qi < 0) continue;
                 auto index = qbaLine.size() - qi - 3;
@@ -250,6 +251,7 @@ void Reader::processGameMemory()
                 qDebug() << "Cried spectator";
                 isCry = true;
             } else if (qbaLine.indexOf("[Quest]\x03") >= 0) {
+                SendKey(DIK_NUMPAD6);
                 auto qi = qbaLine.lastIndexOf("\x04");
                 if (qi < 0) continue;
                 auto index = qbaLine.size() - qi - 2;
