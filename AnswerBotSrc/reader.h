@@ -23,6 +23,15 @@
 #define KEYHOLD_DURATION 20
 #define SAMPLE_RATE 10
 #define NICK "Cat"
+
+#ifdef SIMON
+#define DELIM "\x01:\x04 "
+#else
+#define DELIM ": "
+#endif
+
+#define REQ_CMD "!m"
+#define TRANS_CMD "!t"
 #define NICK_LOWER "cat"
 
 class Reader : public QObject

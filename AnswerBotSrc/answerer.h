@@ -33,6 +33,7 @@ public:
     void setAlivePrisoners(const QString &newAlivePrisoners);
     void setTotalPrisoners(const QString &newTotalPrisoners);
     void setJbDay(const QString &newJbDay);
+    void translate(const QByteArray &q);
 public slots:
     void networkAnswer(QByteArray answer);
 

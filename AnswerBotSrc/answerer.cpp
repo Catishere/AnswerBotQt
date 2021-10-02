@@ -311,6 +311,11 @@ void Answerer::setJbDay(const QString &newJbDay)
     jbDay = newJbDay;
 }
 
+void Answerer::translate(const QByteArray &q)
+{
+    netManager.translate(q);
+}
+
 void Answerer::networkAnswer(QByteArray answer)
 {
     qDebug() << "> " << answer;

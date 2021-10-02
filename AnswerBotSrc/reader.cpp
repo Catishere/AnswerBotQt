@@ -220,27 +220,35 @@ void Reader::processGameMemory()
 
             bool any = true;
 
-            if (qbaLine.indexOf(NICK ": !m ") >= 0) {
+            if (qbaLine.indexOf(NICK DELIM REQ_CMD " ") >= 0) {
                 SendKey(DIK_NUMPAD6);
-                auto qi = qbaLine.lastIndexOf("!m");
+                auto qi = qbaLine.lastIndexOf(REQ_CMD);
                 if (qi < 0) continue;
-                auto index = qbaLine.size() - qi - 3;
-                QByteArray ans = answerer.answer(qbaLine.right(index));
+                QByteArray ans = answerer
+                        .answer(qbaLine
+                                .right(qbaLine.size() - qi - sizeof(REQ_CMD)));
                 qDebug() << "> " << ans;
                 if (!ans.startsWith("Not found"))
                     SendKey(DIK_NUMPAD4);
-            } else if (qbaLine.indexOf(NICK ": clr") >= 0) {
+            } else if (qbaLine.indexOf(NICK DELIM TRANS_CMD " ") >= 0) {
+                SendKey(DIK_NUMPAD6);
+                auto qi = qbaLine.lastIndexOf(TRANS_CMD);
+                if (qi < 0) continue;
+                answerer.translate(qbaLine
+                               .right(qbaLine.size() - qi - sizeof(TRANS_CMD)));
+            } else if (qbaLine.indexOf(NICK DELIM "clr") >= 0) {
                 isCry = false;
                 prevLines.clear();
                 qDebug() << "Reset list";
-            } else if (qbaLine.indexOf(NICK ": ok") >= 0) {
+            } else if (qbaLine.indexOf(NICK DELIM "ok") >= 0) {
                 isCombo = false;
                 qDebug() << "Reset combo";
-            } else if (qbaLine.indexOf(NICK ": ko") >= 0) {
+            } else if (qbaLine.indexOf(NICK DELIM "ko") >= 0) {
                 isCombo = true;
                 qDebug() << "Stop combo";
-            } else if (qbaLine.indexOf(NICK ": ") >= 0) {
-                auto index = qbaLine.size() - qbaLine.lastIndexOf(": ")-3;
+            } else if (qbaLine.indexOf(NICK DELIM) >= 0) {
+                auto index = qbaLine.size() - qbaLine.lastIndexOf(DELIM)
+                        - sizeof (DELIM) + 1;
                 QByteArray ins = qbaLine.right(index);
                 handleComboInstruction(ins);
             } else if (!isCry && qbaLine.indexOf(NICK " to SPECTATOR") >= 0) {
