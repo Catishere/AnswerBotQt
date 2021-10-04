@@ -16,28 +16,31 @@
 #include <QByteArray>
 
 #include "answerer.h"
+#include "bot.h"
 #include "structs.h"
 
 #define CHATMARK_OFFSET 487
 #define COMBO_KEY_DELAY 100
-#define KEYHOLD_DURATION 20
 #define SAMPLE_RATE 10
+
 #define NICK "Cat"
+#define NICK_LOWER "cat"
 
 #ifdef SIMON
 #define DELIM "\x01:\x04 "
+#elif NORMAL_DELIM
+#define DELIM "\x01 : \x01"
 #else
-#define DELIM ": "
+#define DELIM "\x01: "
 #endif
-
 #define REQ_CMD "!m"
 #define TRANS_CMD "!t"
-#define NICK_LOWER "cat"
 
 class Reader : public QObject
 {
     Q_OBJECT
     Answerer answerer;
+    Bot bot;
     QList<QByteArray> prevLines;
     QMap<const QByteArray, int> comboMap;
     QSettings settings;
@@ -59,16 +62,13 @@ class Reader : public QObject
     int GetDlls();
     int OpenP();
     int CloseP();
-    void SendKey(const int key);
     void read();
     void eventLoop();
-    bool isGameFocused() const;
     int handleCombo(char * combo_cstr);
     int handleComboInstruction(QByteArray &instruction);
     int updatePrisoners();
 public slots:
     void processGameMemory();
-    void executeSlot(int mode);
 public:
     explicit Reader(QObject *parent = nullptr);
     ~Reader();

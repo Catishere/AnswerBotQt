@@ -9,6 +9,7 @@
 #include <QFile>
 #include <QMap>
 
+#include "bot.h"
 #include "networkmanager.h"
 #include "tinyexpr.h"
 
@@ -43,7 +44,6 @@ public slots:
 
 signals:
     void interruptLoop();
-    void executeIngame(int);
 
 };
 

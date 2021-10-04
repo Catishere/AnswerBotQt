@@ -39,8 +39,7 @@ int Answerer::writeConfig(QByteArray cfg)
     QFile file(settings.value("path").toString() + "//quest.cfg");
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
         return 1;
-    QTextStream out(&file);
-    out << cfg;
+    file.write(cfg);
     file.close();
     return 0;
 }
@@ -321,7 +320,7 @@ void Answerer::networkAnswer(QByteArray answer)
     qDebug() << "> " << answer;
     if (answer != "Google miss") {
         makeWrite(answer);
-        emit executeIngame(netManager.isTranslate() ? RELOAD_LAUNCH : RELOAD);
+        Bot::execute(netManager.isTranslate() ? RELOAD_LAUNCH : RELOAD);
     }
     emit interruptLoop();
 }

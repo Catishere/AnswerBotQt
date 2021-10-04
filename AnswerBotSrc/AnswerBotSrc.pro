@@ -22,6 +22,7 @@ win32:LIBS += -lkernel32
 
 SOURCES += \
     answerer.cpp \
+    bot.cpp \
         main.cpp \
     networkmanager.cpp \
         reader.cpp \
@@ -29,6 +30,7 @@ SOURCES += \
 
 HEADERS += \
     answerer.h \
+    bot.h \
     networkmanager.h \
     reader.h \
     structs.h \

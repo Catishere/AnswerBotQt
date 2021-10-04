@@ -34,25 +34,9 @@ int Reader::handleComboInstruction(QByteArray &instruction)
         return 1;
     }
 
-    SendKey(it.value());
+    Bot::sendKey(it.value());
     Sleep(COMBO_KEY_DELAY);
     return 0;
-}
-
-void Reader::SendKey(const int key) {
-    if (!isGameFocused()) return;
-
-    INPUT inp[2];
-    memset(inp, 0, sizeof(INPUT));
-    inp[0].type = INPUT_KEYBOARD;
-    inp[0].ki.dwFlags = KEYEVENTF_SCANCODE;
-    inp[1] = inp[0];
-    inp[1].ki.dwFlags |= KEYEVENTF_KEYUP;
-
-    inp[0].ki.wScan = inp[1].ki.wScan = key;
-    SendInput(1, inp, sizeof(INPUT));
-    Sleep(KEYHOLD_DURATION);
-    SendInput(1, inp + 1, sizeof(INPUT));
 }
 
 int Reader::GetHLProcessID()
@@ -188,12 +172,7 @@ void Reader::eventLoop()
     QEventLoop loop;
     QTimer timer;
     connect(&answerer, &Answerer::interruptLoop, &loop, &QEventLoop::quit);
-    connect(&answerer, &Answerer::executeIngame,
-            this, &Reader::executeSlot);
-    connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
     while (true) {
-        timer.setSingleShot(true);
-        timer.start(INT32_MAX);
         loop.exec();
     }
 }
@@ -221,7 +200,7 @@ void Reader::processGameMemory()
             bool any = true;
 
             if (qbaLine.indexOf(NICK DELIM REQ_CMD " ") >= 0) {
-                SendKey(DIK_NUMPAD6);
+                Bot::sendKey(DIK_NUMPAD6);
                 auto qi = qbaLine.lastIndexOf(REQ_CMD);
                 if (qi < 0) continue;
                 QByteArray ans = answerer
@@ -229,9 +208,9 @@ void Reader::processGameMemory()
                                 .right(qbaLine.size() - qi - sizeof(REQ_CMD)));
                 qDebug() << "> " << ans;
                 if (!ans.startsWith("Not found"))
-                    SendKey(DIK_NUMPAD4);
+                    Bot::sendKey(DIK_NUMPAD4);
             } else if (qbaLine.indexOf(NICK DELIM TRANS_CMD " ") >= 0) {
-                SendKey(DIK_NUMPAD6);
+                Bot::sendKey(DIK_NUMPAD6);
                 auto qi = qbaLine.lastIndexOf(TRANS_CMD);
                 if (qi < 0) continue;
                 answerer.translate(qbaLine
@@ -253,19 +232,19 @@ void Reader::processGameMemory()
             } else if (!isCry && qbaLine.indexOf(NICK " to SPECTATOR") >= 0) {
                 QByteArray ba("ne sum afk we");
                 answerer.makeWrite(ba);
-                SendKey(DIK_NUMPAD4);
-                SendKey(DIK_NUMPAD5);
+                Bot::sendKey(DIK_NUMPAD4);
+                Bot::sendKey(DIK_NUMPAD5);
                 qDebug() << "Cried spectator";
                 isCry = true;
             } else if (qbaLine.indexOf("[Quest]\x03") >= 0) {
-                SendKey(DIK_NUMPAD6);
+                Bot::sendKey(DIK_NUMPAD6);
                 auto qi = qbaLine.lastIndexOf("\x04");
                 if (qi < 0) continue;
                 auto index = qbaLine.size() - qi - 2;
                 updatePrisoners();
                 qDebug() << "Quest Answer: "
                          << answerer.answer(qbaLine.right(index));
-                SendKey(DIK_NUMPAD4);
+                Bot::sendKey(DIK_NUMPAD4);
             } else if (qbaLine.indexOf(" " NICK) >= 0
                        || qbaLine.indexOf(" " NICK_LOWER) >= 0) {
                 qDebug() << qbaLine;
@@ -300,21 +279,6 @@ void Reader::processGameMemory()
             }
         }
     }
-}
-
-void Reader::executeSlot(int mode)
-{
-    if (mode & 1)
-        SendKey(DIK_NUMPAD4);
-    if (mode & (1 << 1))
-        SendKey(DIK_NUMPAD5);
-}
-
-bool Reader::isGameFocused() const
-{
-    TCHAR title[FILENAME_MAX];
-    GetWindowText(GetForegroundWindow(), title, FILENAME_MAX);
-    return !_tcsicmp(L"Counter-strike", title);
 }
 
 int Reader::updatePrisoners()
