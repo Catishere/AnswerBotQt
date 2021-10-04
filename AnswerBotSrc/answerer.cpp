@@ -319,7 +319,9 @@ void Answerer::translate(const QByteArray &q)
 void Answerer::networkAnswer(QByteArray answer)
 {
     qDebug() << "> " << answer;
-    if (answer != "Google miss")
+    if (answer != "Google miss") {
         makeWrite(answer);
+        emit executeIngame(netManager.isTranslate() ? RELOAD_LAUNCH : RELOAD);
+    }
     emit interruptLoop();
 }

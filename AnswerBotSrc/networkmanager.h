@@ -29,6 +29,8 @@ public:
     void fromGoogle(QByteArray question);
     void fromGoogleTranslated(QByteArray question);
     void translate(const QByteArray &q);
+    bool isTranslate() const;
+
 public slots:
     void finishedGoogle(QNetworkReply *reply);
     void finishedTranslate(QNetworkReply *reply);

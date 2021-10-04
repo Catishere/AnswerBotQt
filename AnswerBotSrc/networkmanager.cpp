@@ -135,3 +135,8 @@ QByteArray NetworkManager::constructTranslationUrl(const QByteArray &text)
                               q.toUtf8().data()
                               ).toUtf8();
 }
+
+bool NetworkManager::isTranslate() const
+{
+    return translateOnly;
+}

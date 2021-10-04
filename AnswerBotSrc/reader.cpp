@@ -188,8 +188,8 @@ void Reader::eventLoop()
     QEventLoop loop;
     QTimer timer;
     connect(&answerer, &Answerer::interruptLoop, &loop, &QEventLoop::quit);
-    connect(&answerer, &Answerer::interruptLoop,
-            this, &Reader::reloadButton);
+    connect(&answerer, &Answerer::executeIngame,
+            this, &Reader::executeSlot);
     connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
     while (true) {
         timer.setSingleShot(true);
@@ -249,8 +249,7 @@ void Reader::processGameMemory()
             } else if (qbaLine.indexOf(NICK DELIM) >= 0) {
                 auto index = qbaLine.size() - qbaLine.lastIndexOf(DELIM)
                         - sizeof (DELIM) + 1;
-                QByteArray ins = qbaLine.right(index);
-                handleComboInstruction(ins);
+                qDebug() << "Chat:" << qbaLine.right(index);
             } else if (!isCry && qbaLine.indexOf(NICK " to SPECTATOR") >= 0) {
                 QByteArray ba("ne sum afk we");
                 answerer.makeWrite(ba);
@@ -303,9 +302,12 @@ void Reader::processGameMemory()
     }
 }
 
-void Reader::reloadButton()
+void Reader::executeSlot(int mode)
 {
-    SendKey(DIK_NUMPAD4);
+    if (mode & 1)
+        SendKey(DIK_NUMPAD4);
+    if (mode & (1 << 1))
+        SendKey(DIK_NUMPAD5);
 }
 
 bool Reader::isGameFocused() const

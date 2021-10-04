@@ -68,7 +68,7 @@ class Reader : public QObject
     int updatePrisoners();
 public slots:
     void processGameMemory();
-    void reloadButton();
+    void executeSlot(int mode);
 public:
     explicit Reader(QObject *parent = nullptr);
     ~Reader();

@@ -12,6 +12,10 @@
 #include "networkmanager.h"
 #include "tinyexpr.h"
 
+#define RELOAD 0b01
+#define LAUNCH 0b10
+#define RELOAD_LAUNCH (RELOAD | LAUNCH)
+
 class Answerer : public QObject
 {
     Q_OBJECT
@@ -39,6 +43,7 @@ public slots:
 
 signals:
     void interruptLoop();
+    void executeIngame(int);
 
 };
 
