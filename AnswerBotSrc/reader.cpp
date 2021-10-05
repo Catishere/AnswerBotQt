@@ -118,8 +118,19 @@ Reader::Reader(QObject *parent)
             parent, [=](const QString &line) {
         if (line.startsWith("normal"))
             delimiter = "\x01 : \x01";
-        if (line.startsWith("danger"))
+        else if (line.startsWith("danger"))
             delimiter = "\x01: ";
+        else {
+            delimiter = QString(line)
+                    .replace('1', '\x01')
+                    .replace('2', '\x02')
+                    .replace('3', '\x03')
+                    .replace('4', '\x04')
+                    .replace('s', ' ')
+                    .toUtf8();
+        }
+        qDebug() << delimiter;
+        nickdel = nickname + delimiter;
     });
 
     nickname = settings.value("user").toString().toUtf8();
@@ -206,6 +217,7 @@ void Reader::processGameMemory()
     {
         for (auto &line : chat.lines) {
             auto qbaLine = Utf8Encode(line);
+            if (qbaLine.endsWith('\x03')) qbaLine.chop(1); // fix broken servers
             if (prevLines.contains(qbaLine))
                 continue;
 
