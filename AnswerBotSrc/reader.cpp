@@ -112,7 +112,19 @@ Reader::Reader(QObject *parent)
         settings.setValue("path", "YOUR_CSTRIKE_PATH");
     settings.sync();
 
-    nickname = settings.value("user").toString();
+    // listen to console input
+    QConsoleListener console;
+    connect(&console, &QConsoleListener::newLine,
+            parent, [=](const QString &line) {
+        if (line.startsWith("normal"))
+            delimiter = "\x01 : \x01";
+        if (line.startsWith("danger"))
+            delimiter = "\x01: ";
+    });
+
+    nickname = settings.value("user").toString().toUtf8();
+    delimiter = "\x01: ";
+    nickdel = nickname + delimiter;
 
     comboMap = {
         {"Nadqsno",         DIK_D       },
@@ -199,7 +211,7 @@ void Reader::processGameMemory()
 
             bool any = true;
 
-            if (qbaLine.indexOf(NICK DELIM REQ_CMD " ") >= 0) {
+            if (qbaLine.indexOf(nickdel + REQ_CMD " ") >= 0) {
                 Bot::sendKey(DIK_NUMPAD6);
                 auto qi = qbaLine.lastIndexOf(REQ_CMD);
                 if (qi < 0) continue;
@@ -209,27 +221,28 @@ void Reader::processGameMemory()
                 qDebug() << "> " << ans;
                 if (!ans.startsWith("Not found"))
                     Bot::sendKey(DIK_NUMPAD4);
-            } else if (qbaLine.indexOf(NICK DELIM TRANS_CMD " ") >= 0) {
+            } else if (qbaLine.indexOf(nickdel + TRANS_CMD " ") >= 0) {
                 Bot::sendKey(DIK_NUMPAD6);
                 auto qi = qbaLine.lastIndexOf(TRANS_CMD);
                 if (qi < 0) continue;
                 answerer.translate(qbaLine
                                .right(qbaLine.size() - qi - sizeof(TRANS_CMD)));
-            } else if (qbaLine.indexOf(NICK DELIM "clr") >= 0) {
+            } else if (qbaLine.indexOf(nickdel + "clr") >= 0) {
                 isCry = false;
                 prevLines.clear();
                 qDebug() << "Reset list";
-            } else if (qbaLine.indexOf(NICK DELIM "ok") >= 0) {
+            } else if (qbaLine.indexOf(nickdel + "ok") >= 0) {
                 isCombo = false;
                 qDebug() << "Reset combo";
-            } else if (qbaLine.indexOf(NICK DELIM "ko") >= 0) {
+            } else if (qbaLine.indexOf(nickdel + "ko") >= 0) {
                 isCombo = true;
                 qDebug() << "Stop combo";
-            } else if (qbaLine.indexOf(NICK DELIM) >= 0) {
-                auto index = qbaLine.size() - qbaLine.lastIndexOf(DELIM)
-                        - sizeof (DELIM) + 1;
+            } else if (qbaLine.indexOf(nickdel) >= 0) {
+                auto index = qbaLine.size() - qbaLine.lastIndexOf(delimiter)
+                        - delimiter.size();
                 qDebug() << "Chat:" << qbaLine.right(index);
-            } else if (!isCry && qbaLine.indexOf(NICK " to SPECTATOR") >= 0) {
+            } else if (!isCry
+                       && qbaLine.indexOf(nickname + " to SPECTATOR") >= 0) {
                 QByteArray ba("ne sum afk we");
                 answerer.makeWrite(ba);
                 Bot::sendKey(DIK_NUMPAD4);
@@ -245,8 +258,8 @@ void Reader::processGameMemory()
                 qDebug() << "Quest Answer: "
                          << answerer.answer(qbaLine.right(index));
                 Bot::sendKey(DIK_NUMPAD4);
-            } else if (qbaLine.indexOf(" " NICK) >= 0
-                       || qbaLine.indexOf(" " NICK_LOWER) >= 0) {
+            } else if (qbaLine.indexOf(" " + nickname) >= 0
+                       || qbaLine.indexOf(" " + nickname.toLower()) >= 0) {
                 qDebug() << qbaLine;
             } else {
                 any = false;

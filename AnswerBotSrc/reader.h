@@ -14,6 +14,7 @@
 #include <QMap>
 #include <QList>
 #include <QByteArray>
+#include <QConsoleListener>
 
 #include "answerer.h"
 #include "bot.h"
@@ -23,16 +24,6 @@
 #define COMBO_KEY_DELAY 100
 #define SAMPLE_RATE 10
 
-#define NICK "Cat"
-#define NICK_LOWER "cat"
-
-#ifdef SIMON
-#define DELIM "\x01:\x04 "
-#elif NORMAL_DELIM
-#define DELIM "\x01 : \x01"
-#else
-#define DELIM "\x01: "
-#endif
 #define REQ_CMD "!m"
 #define TRANS_CMD "!t"
 
@@ -44,7 +35,9 @@ class Reader : public QObject
     QList<QByteArray> prevLines;
     QMap<const QByteArray, int> comboMap;
     QSettings settings;
-    QString nickname;
+    QByteArray nickname;
+    QByteArray delimiter;
+    QByteArray nickdel;
     QTimer *timer;
 
     HMODULE clientDll;
