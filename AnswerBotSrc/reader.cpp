@@ -91,6 +91,7 @@ int Reader::GetDlls()
                 } else if (!_tcscmp(szModName, L"hw.dll")) {
                     hwDll = hMods[i];
                     hudAddress = (UINT_PTR)hwDll + 0x7ECFA0;
+                    chatInputAddress = (UINT_PTR)hwDll + 0xAB4060;
                     qDebug() << "Found hw.dll";
                 }
             }
@@ -204,6 +205,7 @@ void Reader::processGameMemory()
 {
     chat_struct chat;
     hud_struct hud;
+    char chatInput[120];
     char lastHud[HUD_SECTOR_LEN];
     bool isCry = false;
     bool isCombo = true;
@@ -233,12 +235,6 @@ void Reader::processGameMemory()
                 qDebug() << "> " << ans;
                 if (!ans.startsWith("Not found"))
                     Bot::sendKey(DIK_NUMPAD4);
-            } else if (qbaLine.indexOf(nickdel + TRANS_CMD " ") >= 0) {
-                Bot::sendKey(DIK_NUMPAD6);
-                auto qi = qbaLine.lastIndexOf(TRANS_CMD);
-                if (qi < 0) continue;
-                answerer.translate(qbaLine
-                               .right(qbaLine.size() - qi - sizeof(TRANS_CMD)));
             } else if (qbaLine.indexOf(nickdel + "clr") >= 0) {
                 isCry = false;
                 prevLines.clear();
@@ -302,6 +298,27 @@ void Reader::processGameMemory()
             } else if (qSector.startsWith("JailBreak - Day ")) {
                 answerer.setJbDay(QString(qSector.right(2).trimmed()));
             }
+        }
+    }
+
+    if (ReadProcessMemory(processHandle,
+                          (void *)(chatInputAddress),
+                          chatInput,
+                          sizeof(chatInput),
+                          &bytesRead))
+    {
+        QByteArray line(chatInput);
+        if (!prevLines.contains(line)
+                && line.endsWith("#")
+                && line.indexOf(TRANS_CMD " ") >= 0) {
+            Bot::sendKey(DIK_NUMPAD6);
+            Bot::sendKey(DIK_ESCAPE);
+            line.chop(1);
+            answerer.translate(line
+                       .right(line.size() - sizeof(TRANS_CMD)));
+            prevLines.append(line);
+            if (prevLines.size() > 5)
+                prevLines.removeFirst();
         }
     }
 }

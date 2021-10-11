@@ -47,6 +47,7 @@ class Reader : public QObject
     DWORD pid;
     DWORD baseAddress;
     UINT_PTR chatAddress;
+    UINT_PTR chatInputAddress;
     UINT_PTR prisonersAddress;
     UINT_PTR hudAddress;
 
