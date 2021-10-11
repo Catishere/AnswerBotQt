@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 5.0.1, 2021-10-05T17:12:11. -->
+<!-- Written by QtCreator 5.0.1, 2021-10-09T14:54:14. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -72,7 +72,6 @@
     <value type="Qt::CheckState" key="1@C:/Users/vikto/Documents/AnswerBot/AnswerBotTest/tst_answerbot.cpp:level1Tests">Checked</value>
     <value type="Qt::CheckState" key="1@C:/Users/vikto/Documents/AnswerBot/AnswerBotTest/tst_answerbot.cpp:level2Tests">Checked</value>
     <value type="Qt::CheckState" key="1@C:/Users/vikto/Documents/AnswerBot/AnswerBotTest/tst_answerbot.cpp:level3Tests">Checked</value>
-    <value type="Qt::CheckState" key="1@C:/Users/vikto/Documents/AnswerBot/AnswerBotTest/tst_answerbot.cpp:test_case1">Checked</value>
    </valuemap>
    <value type="int" key="AutoTest.RunAfterBuild">0</value>
    <value type="bool" key="AutoTest.UseGlobal">true</value>

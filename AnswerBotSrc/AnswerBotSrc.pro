@@ -20,7 +20,7 @@ win32:LIBS += -lpsapi
 win32:LIBS += -lkernel32
 @
 
-include($$PWD/QConsoleListener/src/qconsolelistener.pri)
+include($$PWD/../lib/QConsoleListener/src/qconsolelistener.pri)
 
 SOURCES += \
     answerer.cpp \

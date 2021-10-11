@@ -12,6 +12,8 @@ win32:LIBS += -lpsapi
 win32:LIBS += -lkernel32
 @
 
+include($$PWD/../lib/QConsoleListener/src/qconsolelistener.pri)
+
 SOURCES += \
     tst_answerbot.cpp \
     ../AnswerBotSrc/answerer.cpp \
