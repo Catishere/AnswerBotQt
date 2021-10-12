@@ -225,17 +225,7 @@ void Reader::processGameMemory()
 
             bool any = true;
 
-            if (qbaLine.indexOf(nickdel + REQ_CMD " ") >= 0) {
-                Bot::sendKey(DIK_NUMPAD6);
-                auto qi = qbaLine.lastIndexOf(REQ_CMD);
-                if (qi < 0) continue;
-                QByteArray ans = answerer
-                        .answer(qbaLine
-                                .right(qbaLine.size() - qi - sizeof(REQ_CMD)));
-                qDebug() << "> " << ans;
-                if (!ans.startsWith("Not found"))
-                    Bot::sendKey(DIK_NUMPAD4);
-            } else if (qbaLine.indexOf(nickdel + "clr") >= 0) {
+            if (qbaLine.indexOf(nickdel + "clr") >= 0) {
                 isCry = false;
                 prevLines.clear();
                 qDebug() << "Reset list";
@@ -307,18 +297,32 @@ void Reader::processGameMemory()
                           sizeof(chatInput),
                           &bytesRead))
     {
+        bool any = true;
         QByteArray line(chatInput);
         if (!prevLines.contains(line)
-                && line.endsWith("#")
-                && line.indexOf(TRANS_CMD " ") >= 0) {
-            Bot::sendKey(DIK_NUMPAD6);
-            Bot::sendKey(DIK_ESCAPE);
-            line.chop(1);
-            answerer.translate(line
-                       .right(line.size() - sizeof(TRANS_CMD)));
-            prevLines.append(line);
-            if (prevLines.size() > 5)
-                prevLines.removeFirst();
+                && line.endsWith("#")) {
+            if (line.indexOf(TRANS_CMD " ") >= 0) {
+                Bot::sendKey(DIK_NUMPAD6);
+                Bot::sendKey(DIK_ESCAPE);
+                line.chop(1);
+                answerer.translate(line
+                           .right(line.size() - sizeof(TRANS_CMD)));
+            } else if (line.indexOf(REQ_CMD " ") >= 0) {
+                Bot::sendKey(DIK_NUMPAD6);
+                QByteArray ans = answerer
+                        .answer(line
+                                .right(line.size() - sizeof(REQ_CMD)));
+                qDebug() << "> " << ans;
+                if (!ans.startsWith("Not found"))
+                    Bot::sendKey(DIK_NUMPAD4);
+            } else {
+                any = false;
+            }
+            if (any) {
+                prevLines.append(line);
+                if (prevLines.size() > 5)
+                    prevLines.removeFirst();
+            }
         }
     }
 }
