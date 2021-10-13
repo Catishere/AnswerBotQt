@@ -24,8 +24,8 @@
 #define COMBO_KEY_DELAY 100
 #define SAMPLE_RATE 10
 
-#define REQ_CMD "!m"
-#define TRANS_CMD "!t"
+#define REQ_CMD "!"
+#define TRANS_CMD "@"
 
 class Reader : public QObject
 {

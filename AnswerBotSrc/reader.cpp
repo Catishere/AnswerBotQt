@@ -301,17 +301,17 @@ void Reader::processGameMemory()
         QByteArray line(chatInput);
         if (!prevLines.contains(line)
                 && line.endsWith("#")) {
-            if (line.indexOf(TRANS_CMD " ") >= 0) {
+            Bot::sendKey(DIK_ESCAPE);
+            if (line.startsWith(TRANS_CMD)) {
                 Bot::sendKey(DIK_NUMPAD6);
-                Bot::sendKey(DIK_ESCAPE);
                 line.chop(1);
                 answerer.translate(line
-                           .right(line.size() - sizeof(TRANS_CMD)));
-            } else if (line.indexOf(REQ_CMD " ") >= 0) {
+                           .right(line.size() - sizeof(TRANS_CMD) + 1));
+            } else if (line.startsWith(REQ_CMD)) {
                 Bot::sendKey(DIK_NUMPAD6);
                 QByteArray ans = answerer
                         .answer(line
-                                .right(line.size() - sizeof(REQ_CMD)));
+                                .right(line.size() - sizeof(REQ_CMD) + 1));
                 qDebug() << "> " << ans;
                 if (!ans.startsWith("Not found"))
                     Bot::sendKey(DIK_NUMPAD4);
