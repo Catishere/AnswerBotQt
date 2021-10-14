@@ -6,10 +6,13 @@
 #include <QByteArray>
 #include <QSettings>
 #include <QRegularExpression>
+#include <QRandomGenerator>
+#include <QJsonDocument>
 #include <QFile>
 #include <QMap>
 
 #include "bot.h"
+#include "data.h"
 #include "networkmanager.h"
 #include "tinyexpr.h"
 
@@ -20,8 +23,7 @@
 class Answerer : public QObject
 {
     Q_OBJECT
-    QMap<QByteArray, QByteArray> countries;
-    QMap<QByteArray, QByteArray> capitals;
+    Data data;
     QSettings & settings;
     NetworkManager netManager;
     QString alivePrisoners;
@@ -39,6 +41,7 @@ public:
     void setTotalPrisoners(const QString &newTotalPrisoners);
     void setJbDay(const QString &newJbDay);
     void translate(const QByteArray &q);
+    void printRandomCountryCode();
 public slots:
     void networkAnswer(QByteArray answer);
 

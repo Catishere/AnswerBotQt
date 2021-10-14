@@ -315,6 +315,12 @@ void Reader::processGameMemory()
                 qDebug() << "> " << ans;
                 if (!ans.startsWith("Not found"))
                     Bot::sendKey(DIK_NUMPAD4);
+            } else if (line.startsWith("$")) {
+                answerer.printRandomCountryCode();
+                any = false;
+            } else if (line.startsWith("%")) {
+                prevLines.clear();
+                qDebug() << "Reset list";
             } else {
                 any = false;
             }

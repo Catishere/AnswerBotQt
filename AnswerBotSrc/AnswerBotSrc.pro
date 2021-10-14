@@ -25,6 +25,7 @@ include($$PWD/../lib/QConsoleListener/src/qconsolelistener.pri)
 SOURCES += \
     answerer.cpp \
     bot.cpp \
+    data.cpp \
         main.cpp \
     networkmanager.cpp \
         reader.cpp \
@@ -33,6 +34,7 @@ SOURCES += \
 HEADERS += \
     answerer.h \
     bot.h \
+    data.h \
     networkmanager.h \
     reader.h \
     structs.h \

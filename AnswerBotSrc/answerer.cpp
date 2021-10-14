@@ -56,14 +56,14 @@ QByteArray Answerer::answerCapitals(QByteArray &question) const
 
     auto m_country = re_country.match(question);
     if (m_country.hasMatch()) {
-        auto hit = capitals.find(m_country.captured(1).toUtf8());
-        if (hit != capitals.end())
+        auto hit = data.capitals.find(m_country.captured(1).toUtf8());
+        if (hit != data.capitals.end())
             return hit.value();
     }
     auto m_capital = re_capital.match(question);
     if (m_capital.hasMatch()) {
-        auto hit = countries.find(m_capital.captured(2).toUtf8());
-        if (hit != countries.end())
+        auto hit = data.countries.find(m_capital.captured(2).toUtf8());
+        if (hit != data.countries.end())
             return hit.value();
     }
 
@@ -80,220 +80,6 @@ Answerer::Answerer(QSettings &_settings, QObject *parent)
 {
     connect(&netManager, &NetworkManager::parsed,
             this, &Answerer::networkAnswer);
-
-    capitals =
-    {
-        {"abu dabi", "obedineni arabski emirstva"},
-        {"abuja", "nigeriq"},
-        {"adis abeba", "etiopiq"},
-        {"akra", "gana"},
-        {"aljir", "aljir"},
-        {"alofi", "niue"},
-        {"aman", "yordaniq"},
-        {"amsterdam", "holandiq"},
-        {"amsterdam ", "niderlandiq"},
-        {"andora la vela", "andora"},
-        {"ankara", "turciq"},
-        {"antananarivo", "madagaskar"},
-        {"asmara", "eritreq"},
-        {"astana", "kazahstan"},
-        {"asunsion", "paragvai"},
-        {"atina", "gurciq"},
-        {"ashhabad", "turkmenistan"},
-        {"bagdad", "irak"},
-        {"baku", "azerbaijan"},
-        {"bamako", "mali"},
-        {"bandar seri begavan", "brunei"},
-        {"bangi", "centralnoafrikanskata republika"},
-        {"banjul", "gambiq"},
-        {"bankok", "tailand"},
-        {"baster", "seint kic i nevis"},
-        {"beirut", "livan"},
-        {"belgrad", "sarbiq"},
-        {"belmopan", "beliz"},
-        {"berlin", "germaniq"},
-        {"bern", "shveicariq"},
-        {"bishkek", "kirgizstan"},
-        {"bisau", "gvineq-bisau"},
-        {"blumfontein", "republika iujna afrika"},
-        {"bogota", "kolumbiq"},
-        {"brazavil", "kongo"},
-        {"bratislava", "slovakiq"},
-        {"brijtaun", "barbados"},
-        {"briuksel", "belgiq"},
-        {"budapeshta", "ungariq"},
-        {"buenos aires", "arjentina"},
-        {"bujumbura", "burundi"},
-        {"bukuresht", "rumaniq"},
-        {"vaduc", "lihtenshtain"},
-        {"valeta", "malta"},
-        {"varshava", "polsha"},
-        {"vatikana", "vatikana"},
-        {"vashington", "sasht"},
-        {"viena", "avstriq"},
-        {"vientqn", "laos"},
-        {"vilnius", "litva"},
-        {"vindhuk", "namibiq"},
-        {"gaborone", "bocvana"},
-        {"gvatemala", "gvatemala"},
-        {"daka", "bangladesh"},
-        {"dakar", "senegal"},
-        {"damask", "siriq"},
-        {"dar es salaam", "tanzaniq"},
-        {"jakarta", "indoneziq"},
-        {"jibuti", "jibuti"},
-        {"jorjtaun", "gviana"},
-        {"dili", "iztochen timor"},
-        {"dodoma", "tanzaniq"},
-        {"doha", "katar"},
-        {"dushanbe", "tajikistan"},
-        {"dablin", "irlandiq"},
-        {"el aiun", "zapadna sahara"},
-        {"erevan", "armeniq"},
-        {"zagreb", "harvatiq"},
-        {"islamabad", "pakistan"},
-        {"kabul", "afganistan"},
-        {"kairo", "egipet"},
-        {"kampala", "uganda"},
-        {"kanbera", "avstraliq"},
-        {"karakas", "venecuela"},
-        {"kastriis", "seint lusiq"},
-        {"katmandu", "nepal"},
-        {"keiptaun", "republika iujna afrika"},
-        {"kigali", "ruanda"},
-        {"kiev", "ukraina"},
-        {"kingstaun", "seint vinsent i grenadini"},
-        {"kingstan", "qmaika"},
-        {"kinshasa", "demokratichna republika kongo"},
-        {"kito", "ekvador"},
-        {"kishinev", "moldova"},
-        {"konakri", "gvineq"},
-        {"kopenhagen", "daniq"},
-        {"kuala lumpur", "malaiziq"},
-        {"kuveit", "kuveit"},
-        {"la pas", "boliviq"},
-        {"libarvil", "gabon"},
-        {"lilongve", "malavi"},
-        {"lima", "peru"},
-        {"lisabon", "portugaliq"},
-        {"lobamba", "esvatini"},
-        {"lome", "togo"},
-        {"london", "velikobritaniq"},
-        {"london ", "angliq"},
-        {"luanda", "angola"},
-        {"lusaka", "zambiq"},
-        {"liublqna", "sloveniq"},
-        {"liuksemburg", "liuksemburg"},
-        {"majuro", "marshalovi ostrovi"},
-        {"madrid", "ispaniq"},
-        {"malabo", "ekvatorialna gvineq"},
-        {"male", "maldivi"},
-        {"managua", "nikaragua"},
-        {"manama", "bahrein"},
-        {"manila", "filipini"},
-        {"maputo", "mozambik"},
-        {"maseru", "lesoto"},
-        {"maskat", "oman"},
-        {"mbabane", "esvatini"},
-        {"meksiko", "meksiko"},
-        {"ngerulmud", "palau"},
-        {"minsk", "belarus"},
-        {"mogadishu", "somaliq"},
-        {"monako", "monako"},
-        {"monroviq", "liberiq"},
-        {"montevideo", "urugvai"},
-        {"moroni", "komorski ostrovi"},
-        {"moskva", "rusiq"},
-        {"naipidal", "mianmar"},
-        {"nairobi", "keniq"},
-        {"nasau", "bahamski ostrovi"},
-        {"njamena", "chad"},
-        {"niamei", "niger"},
-        {"nikoziq", "kipar"},
-        {"nuakshot", "mavritaniq"},
-        {"nuku'alofa", "tonga"},
-        {"nuuk", "grenlandiq"},
-        {"niu delhi", "indiq"},
-        {"oslo", "norvegiq"},
-        {"otava", "kanada"},
-        {"palikir", "mikroneziq"},
-        {"panama", "panama"},
-        {"paramaribo", "surinam"},
-        {"parij", "franciq"},
-        {"pekin", "kitai"},
-        {"pnom pen", "kamboja"},
-        {"podgorica", "cherna gora"},
-        {"port vila", "vanuatu"},
-        {"port lui", "mavricii"},
-        {"port morsbi", "papua nova gvineq"},
-        {"port o prens", "haiti"},
-        {"port af spein", "trinidad i tobago"},
-        {"porto novo", "benin"},
-        {"praga", "chehiq"},
-        {"praq", "kabo verde"},
-        {"pretoriq", "republika iujna afrika"},
-        {"phenqn", "severna koreq"},
-        {"rabat", "maroko"},
-        {"reikqvik", "islandiq"},
-        {"riga", "latviq"},
-        {"rim", "italiq"},
-        {"riqd", "saudicka arabiq"},
-        {"rozo", "dominika"},
-        {"san marino", "san marino"},
-        {"san salvador", "salvador"},
-        {"san hose", "kosta rika"},
-        {"san huan", "puerto riko"},
-        {"sana", "yemen"},
-        {"edinburg", "shotlandiq"},
-        {"santo domingo", "dominikanska republika"},
-        {"santqgo de chile", "chili"},
-        {"sao tome", "sao tome i prinsipi"},
-        {"saraevo", "bosna i hercegovina"},
-        {"seint jorjes", "grenada"},
-        {"seint jons", "antigua i barbuda"},
-        {"seul", "iujna koreq"},
-        {"singapur", "singapur"},
-        {"skopie", "severna makedoniq"},
-        {"sofia", "bulgaria"},
-        {"sofiq", "bulgariq"},
-        {"stokholm", "shveciq"},
-        {"sukre", "boliviq"},
-        {"suva", "fiji"},
-        {"taipe", "taivan"},
-        {"talin", "estoniq"},
-        {"tashkent", "uzbekistan"},
-        {"tbilisi", "gruziq"},
-        {"tegusigalpa", "honduras"},
-        {"teheran", "iran"},
-        {"tirana", "albaniq"},
-        {"tokio", "qponiq"},
-        {"tripoli", "libiq"},
-        {"tunis", "tunis"},
-        {"thimphu", "butan"},
-        {"uagadugu", "burkina faso"},
-        {"wellington", "nova zelandiq"},
-        {"ulan bator", "mongoliq"},
-        {"friitaun", "siera leone"},
-        {"funafuti", "tuvalu"},
-        {"havana", "kuba"},
-        {"hanoi", "vietnam"},
-        {"harare", "zimbabve"},
-        {"hartum", "sudan"},
-        {"helzinki", "finlandiq"},
-        {"honiara", "solomonovi ostrovi"},
-        {"shri jaqvardanapura kote", "shri lanka"},
-        {"iujna tarava", "kiribati"},
-        {"qmusukro", "kot d'ivoar"},
-        {"qren", "nauru"},
-        {"qunde", "kamerun"},
-    };
-
-    for (auto it = capitals.constKeyValueBegin();
-         it != capitals.constKeyValueEnd();
-         it++)
-    {
-        countries.insert(it->second, it->first);
-    }
 }
 void Answerer::setAlivePrisoners(const QString &newAlivePrisoners)
 {
@@ -313,6 +99,20 @@ void Answerer::setJbDay(const QString &newJbDay)
 void Answerer::translate(const QByteArray &q)
 {
     netManager.translate(q);
+}
+
+void Answerer::printRandomCountryCode()
+{
+    int number = QRandomGenerator::global()->bounded(0, data.codesCount);
+    int i = 0;
+    for (auto it = data.codes.constKeyValueBegin();
+         it != data.codes.constKeyValueEnd();
+         it++)
+    {
+        if (i == number)
+            qDebug() << it->first << " " << it->second;
+        i++;
+    }
 }
 
 void Answerer::networkAnswer(QByteArray answer)
