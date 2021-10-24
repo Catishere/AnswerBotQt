@@ -309,6 +309,7 @@ void Reader::processGameMemory()
                            .right(line.size() - sizeof(TRANS_CMD) + 1));
             } else if (line.startsWith(REQ_CMD)) {
                 Bot::sendKey(DIK_NUMPAD6);
+                line.chop(1);
                 QByteArray ans = answerer
                         .answer(line
                                 .right(line.size() - sizeof(REQ_CMD) + 1));
